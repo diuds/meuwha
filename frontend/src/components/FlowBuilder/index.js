@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { Paper, Box, Typography, Drawer, IconButton } from '@material-ui/core';
-import { Settings as SettingsIcon } from '@material-ui/icons';
+import { Paper, Box, Typography, Drawer, IconButton, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@material-ui/core';
+import { Settings as SettingsIcon, Add as AddIcon } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -44,18 +44,48 @@ const FlowBuilder = () => {
   const classes = useStyles();
   const [selectedNode, setSelectedNode] = useState(null);
   const [propertiesPanelOpen, setPropertiesPanelOpen] = useState(false);
+  const [newFlowDialogOpen, setNewFlowDialogOpen] = useState(false);
+  const [newFlowName, setNewFlowName] = useState('');
+  const [customBlockDialogOpen, setCustomBlockDialogOpen] = useState(false);
+  const [customBlockName, setCustomBlockName] = useState('');
 
   const handleNodeSelect = (node) => {
     setSelectedNode(node);
     setPropertiesPanelOpen(true);
   };
 
+  const handleNewFlow = () => {
+    if (newFlowName.trim()) {
+      // TODO: Implement flow creation logic
+      console.log('Creating new flow:', newFlowName);
+      setNewFlowName('');
+      setNewFlowDialogOpen(false);
+    }
+  };
+
+  const handleNewCustomBlock = () => {
+    if (customBlockName.trim()) {
+      // TODO: Implement custom block creation logic
+      console.log('Creating custom block:', customBlockName);
+      setCustomBlockName('');
+      setCustomBlockDialogOpen(false);
+    }
+  };
+
   return (
     <div className={classes.root}>
       <div className={classes.toolbox}>
-        <Typography variant="h6" gutterBottom>
-          Flow Elements
-        </Typography>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+          <Typography variant="h6">Flow Elements</Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            onClick={() => setNewFlowDialogOpen(true)}
+          >
+            New Flow
+          </Button>
+        </Box>
         <div className={classes.nodeItem}>
           <Typography>Message Node</Typography>
         </div>
@@ -65,6 +95,57 @@ const FlowBuilder = () => {
         <div className={classes.nodeItem}>
           <Typography>Input Node</Typography>
         </div>
+        <Box mt={2}>
+          <Button
+            variant="outlined"
+            color="primary"
+            fullWidth
+            startIcon={<AddIcon />}
+            onClick={() => setCustomBlockDialogOpen(true)}
+          >
+            Create Custom Block
+          </Button>
+        </Box>
+
+        <Dialog open={newFlowDialogOpen} onClose={() => setNewFlowDialogOpen(false)}>
+          <DialogTitle>Create New Flow</DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              margin="dense"
+              label="Flow Name"
+              fullWidth
+              value={newFlowName}
+              onChange={(e) => setNewFlowName(e.target.value)}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setNewFlowDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleNewFlow} color="primary" variant="contained">
+              Create
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        <Dialog open={customBlockDialogOpen} onClose={() => setCustomBlockDialogOpen(false)}>
+          <DialogTitle>Create Custom Block</DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              margin="dense"
+              label="Block Name"
+              fullWidth
+              value={customBlockName}
+              onChange={(e) => setCustomBlockName(e.target.value)}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setCustomBlockDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleNewCustomBlock} color="primary" variant="contained">
+              Create
+            </Button>
+          </DialogActions>
+        </Dialog>
       </div>
 
       <Paper className={classes.canvas}>
