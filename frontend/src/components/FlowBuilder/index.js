@@ -54,6 +54,29 @@ const FlowBuilder = () => {
   const [customBlockDialogOpen, setCustomBlockDialogOpen] = useState(false);
   const [customBlockName, setCustomBlockName] = useState('');
 
+  const onDragStart = (event, nodeType) => {
+    event.dataTransfer.setData('application/reactflow', nodeType);
+    event.dataTransfer.effectAllowed = 'move';
+  };
+
+  const onDrop = (event) => {
+    event.preventDefault();
+    const nodeType = event.dataTransfer.getData('application/reactflow');
+    const position = { x: event.clientX, y: event.clientY };
+    const newNode = {
+      id: `${nodeType}-${nodes.length + 1}`,
+      type: nodeType,
+      position,
+      data: { label: `${nodeType} node` }
+    };
+    setNodes((nds) => [...nds, newNode]);
+  };
+
+  const onDragOver = (event) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  };
+
   const onNodeDragStop = (event, node) => {
     const updatedNodes = nodes.map(n => {
       if (n.id === node.id) {
@@ -110,13 +133,25 @@ const FlowBuilder = () => {
             New Flow
           </Button>
         </Box>
-        <div className={classes.nodeItem}>
+        <div
+          className={classes.nodeItem}
+          draggable
+          onDragStart={(event) => onDragStart(event, 'message')}
+        >
           <Typography>Message Node</Typography>
         </div>
-        <div className={classes.nodeItem}>
+        <div
+          className={classes.nodeItem}
+          draggable
+          onDragStart={(event) => onDragStart(event, 'condition')}
+        >
           <Typography>Condition Node</Typography>
         </div>
-        <div className={classes.nodeItem}>
+        <div
+          className={classes.nodeItem}
+          draggable
+          onDragStart={(event) => onDragStart(event, 'input')}
+        >
           <Typography>Input Node</Typography>
         </div>
         <Box mt={2}>
@@ -172,7 +207,11 @@ const FlowBuilder = () => {
         </Dialog>
       </div>
 
-      <Paper className={classes.canvas}>
+      <Paper 
+        className={classes.canvas}
+        onDrop={onDrop}
+        onDragOver={onDragOver}
+      >
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -181,6 +220,11 @@ const FlowBuilder = () => {
           onNodeClick={onNodeClick}
           snapToGrid={true}
           snapGrid={[15, 15]}
+          nodeTypes={{
+            message: FlowNode,
+            condition: FlowNode,
+            input: FlowNode
+          }}
         >
           <Background />
           <Controls />
@@ -198,7 +242,17 @@ const FlowBuilder = () => {
             Properties
           </Typography>
           {selectedNode ? (
-            <Typography>Selected Node Properties</Typography>
+            <FlowNodeSettings
+              node={selectedNode}
+              onSave={(settings) => {
+                setNodes(nodes.map(n => 
+                  n.id === selectedNode.id 
+                    ? { ...n, data: { ...n.data, settings } }
+                    : n
+                ));
+                setPropertiesPanelOpen(false);
+              }}
+            />
           ) : (
             <Typography>Select a node to edit properties</Typography>
           )}
