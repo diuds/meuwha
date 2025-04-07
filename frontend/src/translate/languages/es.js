@@ -288,6 +288,7 @@ const messages = {
           tickets: "Tickets",
           contacts: "Contactos",
           quickAnswers: "Respuestas rápidas",
+          flows: "Constructor de Flujo",
           queues: "Linhas",
           administration: "Administración",
           users: "Usuarios",
