@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { Paper, Box, Typography, Drawer, IconButton, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@material-ui/core';
 import { Settings as SettingsIcon, Add as AddIcon } from '@material-ui/icons';
+import ReactFlow, { Background, Controls } from 'react-flow-renderer';
+import FlowNode from './FlowNode';
+import FlowNodeSettings from './FlowNodeSettings';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -42,12 +45,33 @@ const useStyles = makeStyles((theme) => ({
 
 const FlowBuilder = () => {
   const classes = useStyles();
+  const [nodes, setNodes] = useState([]);
+  const [edges, setEdges] = useState([]);
   const [selectedNode, setSelectedNode] = useState(null);
   const [propertiesPanelOpen, setPropertiesPanelOpen] = useState(false);
   const [newFlowDialogOpen, setNewFlowDialogOpen] = useState(false);
   const [newFlowName, setNewFlowName] = useState('');
   const [customBlockDialogOpen, setCustomBlockDialogOpen] = useState(false);
   const [customBlockName, setCustomBlockName] = useState('');
+
+  const onNodeDragStop = (event, node) => {
+    const updatedNodes = nodes.map(n => {
+      if (n.id === node.id) {
+        return { ...n, position: node.position };
+      }
+      return n;
+    });
+    setNodes(updatedNodes);
+  };
+
+  const onConnect = (params) => {
+    setEdges((eds) => [...eds, params]);
+  };
+
+  const onNodeClick = (event, node) => {
+    setSelectedNode(node);
+    setPropertiesPanelOpen(true);
+  };
 
   const handleNodeSelect = (node) => {
     setSelectedNode(node);
@@ -149,12 +173,18 @@ const FlowBuilder = () => {
       </div>
 
       <Paper className={classes.canvas}>
-        {/* Canvas content will be implemented with a flow visualization library */}
-        <Box position="absolute" right={16} top={16}>
-          <IconButton onClick={() => setPropertiesPanelOpen(true)}>
-            <SettingsIcon />
-          </IconButton>
-        </Box>
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodeDragStop={onNodeDragStop}
+          onConnect={onConnect}
+          onNodeClick={onNodeClick}
+          snapToGrid={true}
+          snapGrid={[15, 15]}
+        >
+          <Background />
+          <Controls />
+        </ReactFlow>
       </Paper>
 
       <Drawer
